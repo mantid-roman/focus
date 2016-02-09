@@ -1,0 +1,8 @@
+! Parameters used in MULTI_FRILLS
+!
+! Modified:
+!  19/9/94	T.G.Perring	Added parameter MAX_PLT
+!				*** Make sure that MAX_PLT >= MAX_DAT***
+!
+	integer*4 max_par, max_dat, max_set, max_cmp, max_plt
+	parameter (MAX_PAR = 150, MAX_DAT = 1000, MAX_PLT=1000, MAX_SET = 10, MAX_CMP = 10)

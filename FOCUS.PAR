@@ -1,0 +1,2 @@
+      integer MAX_CHI2
+      parameter (MAX_CHI2=100)

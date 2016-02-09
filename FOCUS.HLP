@@ -1,0 +1,30 @@
+ ------------------------------------------------------------------------------
+|command: focus                                                                |
+|aim    : Help on abbreviated FOCUS commands on ISISE.                         |
+|action : Gives this help file out.                                            |
+|------------------------------------------------------------------------------|
+|command: focs                                                                 |
+|aim    : To copy FOCUS source code from user$disk:[pf01.focus] to focus_devel:|
+|action : The focs command  copies all *.com, *.for, *.inc, *.hlp, and *.par   |
+|         files from user$disk:[pf01.focus] to focus_devel: and does a purge   |
+|         focus_devel:.                                                        |
+|------------------------------------------------------------------------------|
+|command: focc                                                                 |
+|aim    : To compile the FOCUS source code on ISISE.                           |
+|action : The focc command compiles all focus_devel: *.for files, writes the   |
+|         object files to sys$scratch: and does a purge on sys$scratch:*.obj.  |
+|------------------------------------------------------------------------------|
+|command: focl                                                                 |
+|aim    : To link the compiled FOCUS source code to libraries.                 |
+|action : The focl command links the sys$scratch:*.obj object files to io/lib, |
+|         multi_frills/lib, peaks/lib, g_v2/lib, genie_lib/lib, nagf/opt,      |
+|         gksforbnd/lib. A sys$input/opt of ISD_MAX=128 is used.               |
+|         Copies focus.exe to focus_devel:, purges focus.exe on focus_devel:,  |
+|         deletes  focus.exe  on the area from which focl is called and deletes|
+|         all *.obj;* files on sys$scratch:.                                   |
+|------------------------------------------------------------------------------|
+|command: focus_release                                                        |
+|aim    : To release a new FOCUS program to public.                            |
+|action : The  focus_release  command  copies all *.com, *.for, *.inc, *.hlp   |
+|         focus.exe from focus_devel: to focus_ref:.Does a purge on focus_ref:.|
+ ------------------------------------------------------------------------------
