@@ -1,3 +1,4 @@
+      
       program focus
 !  ---------------------------------------------------------------------    
 ! |                        module FOCUS.FOR                             |
@@ -16,25 +17,25 @@
 !
 ! include header 
      implicit none
-      include 'CF_SOURCES:FRILLS.INC'
+      include 'FRILLS.INC'
 !-----------------------------------------------------------------------
 ! define common blocks
 !-----------------------------------------------------------------------
-      include 'CF_SOURCES:FOCUS.INC' 
-      include 'CF_SOURCES:LIMIT.INC'
-      include 'CF_SOURCES:LIMITPAR.INC'
-      include 'CF_SOURCES:MONTE.INC' 
-      include 'CF_SOURCES:XR.INC' 
-      include 'CF_SOURCES:CONTROL.INC'
-      include 'CF_SOURCES:DEGENERATION.INC'
-      include 'CF_SOURCES:FORMFACTOR.INC'
-      include 'CF_SOURCES:CANTED.INC'
-      include 'CF_SOURCES:RNUMBER.INC'
-      include 'CF_SOURCES:NO0PAR.INC'
-      include 'CF_SOURCES:RESOLUTION.INC'
-      include 'CF_SOURCES:SELF.INC'
-      include 'CF_SOURCES:INSTRUMENT.INC'
-      include 'CF_SOURCES:OVERALL.INC'
+      include 'FOCUS.INC' 
+      include 'LIMIT.INC'
+      include 'LIMITPAR.INC'
+      include 'MONTE.INC' 
+      include 'XR.INC' 
+      include 'CONTROL.INC'
+      include 'DEGENERATION.INC'
+      include 'FORMFACTOR.INC'
+      include 'CANTED.INC'
+      include 'RNUMBER.INC'
+      include 'NO0PAR.INC'
+      include 'RESOLUTION.INC'
+      include 'SELF.INC'
+      include 'INSTRUMENT.INC'
+      include 'OVERALL.INC'
 
 !-----------------------------------------------------------------------
 ! the name of the fitting subroutine
@@ -1123,7 +1124,7 @@ c-----------------------------------------------------------------------
          implicit none
          real*8 value
          integer pos
-      include 'CF_SOURCES:FRILLS.INC'
+      include 'FRILLS.INC'
          p(pos) = value
       return
       end
@@ -1132,13 +1133,13 @@ c     FOCUS defined fitting subroutine
 c-----------------------------------------------------------------------
       subroutine CFFIT 
 
-        include 'CF_SOURCES:FUNCTION.INC'
-        include 'CF_SOURCES:FOCUS.INC' 
-        include 'CF_SOURCES:XR.INC' 
-        include 'CF_SOURCES:CONTROL.INC' 
-        include 'CF_SOURCES:DEGENERATION.INC'
-        include 'CF_SOURCES:SELF.INC' 
-	include 'CF_SOURCES:RESOLUTION.INC'
+        include 'FUNCTION.INC'
+        include 'FOCUS.INC' 
+        include 'XR.INC' 
+        include 'CONTROL.INC' 
+        include 'DEGENERATION.INC'
+        include 'SELF.INC' 
+	include 'RESOLUTION.INC'
 
 
  	external c_fmevkelvin
@@ -1406,7 +1407,7 @@ c       ----------------------------------------------------------
  	   iint = 1000*el_intensity*intcorr/4/pi  ! intensity in mb per sr
            yc(j,2) = 0.0d0
            if(setres.eq.0 .and. x(j).le.ei) then
- 	      yc(j,2) = shape(lineshape(0),x(j),epos,el_width,iint,temp)
+ 	      yc(j,2) = shape_(lineshape(0),x(j),epos,el_width,iint,temp)
            else if(setres.eq.1 .and. x(j).le.ei) then
                  r_chop = (1.0d0 + (lmc+lcs)/lsd * (1-x(j)/ei)**1.5)/(1.0d0 + (lmc+lcs)/lsd)
                  r_mod  = (1.0d0 +      lcs /lsd * (1-x(j)/ei)**1.5)/(1.0d0 +      lcs /lsd)
@@ -1438,7 +1439,7 @@ c       ----------------------------------------------------------
 !                    -------------------------------------------------
                      yc(j,3) = 0.0d0
                      if(setres.eq.0) then
-                        yc(j,3)=shape(lineshape(k),x(j),epos,qe_width,iint,temp) 
+                        yc(j,3)=shape_(lineshape(k),x(j),epos,qe_width,iint,temp) 
                      else
     	             	r_chop = (1.0d0 + (lmc+lcs)/lsd * (1-x(j)/ei)**1.5)/(1.0d0 + (lmc+lcs)/lsd)
         	        r_mod  = (1.0d0 +      lcs /lsd * (1-x(j)/ei)**1.5)/(1.0d0 +      lcs /lsd)
@@ -1457,7 +1458,7 @@ c       ----------------------------------------------------------
 !                    INELASTIC LINES
 !                    -------------------------------------------------
                      if(setres.eq.0) then
-   	                inelas = shape(lineshape(k),x(j),epos,width,iint,temp) 
+   	                inelas = shape_(lineshape(k),x(j),epos,width,iint,temp) 
                      else
     	             	r_chop = (1.0d0 + (lmc+lcs)/lsd * (1-x(j)/ei)**1.5)/(1.0d0 + (lmc+lcs)/lsd)
         	        r_mod  = (1.0d0 +      lcs /lsd * (1-x(j)/ei)**1.5)/(1.0d0 +      lcs /lsd)
@@ -1485,37 +1486,6 @@ c       ----------------------------------------------------------
 
   	iscalc = 1
  
-      return
-      end
-c     -----------------------------------------------------------------------
-c     set the lineshape of a special excitation
-c     -----------------------------------------------------------------------
-      real*8 function shape(no_lineshape,x,x0,fwhm,intensity,temp) 
- 	implicit none
- 	integer no_lineshape
- 	real*8 x,x0,fwhm,intensity,temp
- 	real*8 gauss,lorentz,lorentz_bose
-        integer no_min
-        integer no_max
-
-        data no_min /1/
-        data no_max /3/
-
-  	if(fwhm.eq.0.0d0) then
-           shape = 0.0d0
- 	   return
- 	end if   
-
-
-  	if(no_lineshape.lt.no_min .or. no_lineshape.gt.no_max) no_lineshape=1
- 
- 	if(no_lineshape.eq. 1) then
- 		shape = gauss(x,x0,fwhm,intensity)
- 	else if(no_lineshape.eq. 2) then
-                shape = lorentz(x,x0,fwhm,intensity)
-        else if(no_lineshape.eq. 3) then
-                shape = lorentz_bose(x,fwhm,intensity,temp) 
- 	end if
       return
       end
 !     --------------------------------------------------------------------------       
@@ -1614,3 +1584,34 @@ c     --------------------------------------------------------------------------
  	lorentz = intensity/pi*fwhm/2/((fwhm/2)**2+(x-x0)**2)
       return
       end                                                                                           
+c     -----------------------------------------------------------------------
+c     set the lineshape of a special excitation
+c     -----------------------------------------------------------------------
+      real*8 function shape_(no_lineshape,x,x0,fwhm,intensity,temp) 
+ 	implicit none
+ 	integer no_lineshape
+ 	real*8 x,x0,fwhm,intensity,temp
+ 	real*8 gauss,lorentz,lorentz_bose
+        integer no_min
+        integer no_max
+
+        data no_min /1/
+        data no_max /3/
+
+  	if(fwhm.eq.0.0d0) then
+           shape_ = 0.0d0
+ 	   return
+ 	end if   
+
+
+  	if(no_lineshape.lt.no_min .or. no_lineshape.gt.no_max) no_lineshape=1
+ 
+ 	if(no_lineshape.eq. 1) then
+ 		shape_ = gauss(x,x0,fwhm,intensity)
+ 	else if(no_lineshape.eq. 2) then
+                shape_ = lorentz(x,x0,fwhm,intensity)
+        else if(no_lineshape.eq. 3) then
+                shape_ = lorentz_bose(x,fwhm,intensity,temp) 
+ 	end if
+      return
+      end

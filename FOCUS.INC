@@ -14,7 +14,7 @@ c--------------------------------------------------------------------
 c       INPUT VALUES FOR C_CRYSTAL_FIELD
 c       INPUT VALUES FOR C_EXCITATIONS
 
-        include 'CF_SOURCES:FOCUS.PAR'
+        include 'FOCUS.PAR'
 
 	integer nre             ! 1=Ce3+,2=Pr3+, ... ,13=Yb3+  
 	integer symmetry        ! chooses the point symmetry of the R3+ ion                           

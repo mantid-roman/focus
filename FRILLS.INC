@@ -1,4 +1,4 @@
-	include 'CF_SOURCES:FRILLS.PAR'
+	include 'FRILLS.PAR'
 
 	character nam*20, message*50, fit_time*20, xlab*5, ylab*5, xcap*40, ycap*40, title*80, subtitle*60
 	integer*4 nptot, np, inp, inr, nf, inf, inrf, ns, is, ins, nd, nv, inv, nc, status, max_iter, max_div, output

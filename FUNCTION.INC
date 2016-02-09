@@ -1,5 +1,5 @@
 c include file for user's function
-      include 'FRILLS_SOURCES:FRILLS.PAR'
+      include 'FRILLS.PAR'
 
       integer*4 is, nv, nc
       real*8    x,  ycal, p, yc

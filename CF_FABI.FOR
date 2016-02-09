@@ -41,13 +41,45 @@ cc            - the magnetic moment of R3+ [in myb]
 cc
 cc--------------------------------------------------------------------
 c
+c---------------------------------------
+      real*8 function epsilon_(k,q)
+c---------------------------------------
+      implicit none
+      integer k,q
+      real*8 eps(49)
+
+c ... epsilon_kq
+      data eps/            1.00000000000000,     
+     1  0.707106781186547, 1.00000000000000, -0.707106781186547,     
+     2  0.612372435695795, 1.22474487139159,  0.500000000000000,     
+     2 -1.22474487139159,  0.612372435695795,
+     3  0.559016994374947, 1.36930639376292,  0.433012701892219,
+     3  0.500000000000000,-0.433012701892219, 1.36930639376292,
+     3 -0.559016994374947,
+     4  0.522912516583797, 1.47901994577490,  0.395284707521047,     
+     4  0.559016994374947, 0.125000000000000,-0.559016994374947,
+     4  0.395284707521047,-1.47901994577490,  0.522912516583797,     
+     5  0.496078370824611, 1.56873754975139,  0.369754986443726,     
+     5  0.603807364424560, 0.114108866146910, 0.125000000000000,     
+     5 -0.114108866146910, 0.603807364424560,-0.369754986443726,     
+     5  1.56873754975139, -0.496078370824611,     
+     6  0.474958879799083, 1.64530582263602,  0.350780380010057,     
+     6  0.640434422872475, 0.106739070478746, 0.135015431216830,     
+     6  0.062500000000000,-0.135015431216830, 0.106739070478746,     
+     6 -0.640434422872475, 0.350780380010057,-1.64530582263602,     
+     6  0.474958879799083/
+
+        epsilon_ = eps(k*(k+1) + q+1)
+
+      return
+      end
 c-----------------------------------------------
 c returns the number of parameters which are
 c the same for all symmetries
 c-----------------------------------------------
       integer function no_0_par()
 	implicit none
-        include 'CF_SOURCES:no0par.inc'
+        include 'no0par.inc'
         no_0_par = cno_0_par
       return
       end
@@ -982,8 +1014,8 @@ c---------------------------------------------------------------
       subroutine p_excitations(out,de,di)
 	implicit none
 
- 	include 'CF_SOURCES:FOCUS.INC'
- 	include 'CF_SOURCES:CONTROL.INC'
+ 	include 'FOCUS.INC'
+ 	include 'CONTROL.INC'
 
 	integer out
 	real*8  de,di
@@ -1027,7 +1059,7 @@ c-----------------------------------------------------
 	integer out
 	real*8  eex(17*17),iex(17*17)
 	integer nex                     
-	include 'CF_SOURCES:CF_FABI.INC'   
+	include 'CF_FABI.INC'   
 c	real*8  e_excitation(17*17) ! energy position [kelvin] of the excit.
 c	real*8  i_excitation(17*17) ! intensity [barn] of the excitations
 c	integer n_excitation        ! number of excitations found          
@@ -1174,7 +1206,7 @@ c	energy levels which are closer than de are assumed to be degenerated
 c	only those excitations are taken into account whose intensities are 
 c	greater equal than di
 
-        integer i,k,ii,kk
+        integer i,k,ii,kk, dim
 	integer no       ! is a function which is called
 
                                                                                 
@@ -1183,7 +1215,8 @@ c find out how many degenerated energy levels exists
 	e_energies(1)   = 0.0d0
 	degeneration(1) = 1
 	k=1
-	do i=2,dimj
+	dim = dimj
+	do i=2,dim
 	   if( abs(e_energies(k)-energy(i)).ge.de ) then
                k=k+1
 	       e_energies(k)   = energy(i)
@@ -1197,9 +1230,9 @@ c find out how many degenerated energy levels exists
 c store the intensities of the degenarated levels
 
 	call clear(i_energies)
-	do i=1,dimj
+	do i=1,dim
 	   ii =  no(i,degeneration,n_energies)  
-	   do k=1,dimj
+	   do k=1,dim
 	      kk = no(k,degeneration,n_energies) 
 	      i_energies(ii,kk)=i_energies(ii,kk)+mat(i,k)	
 	   end do
@@ -1723,7 +1756,7 @@ c----------------------------------------------------------------------
 	integer i,dim
 	dim = dimj
 	c_moment = cmplx(0.0d0,0.0d0)  
-	do i=1,dimj
+	do i=1,dim
            c_moment = c_moment + exp_(-ew(i)/t)/z * matjx(ev,i,i,dim)
 	end do
 	c_x_moment = -gj*c_moment
@@ -1741,7 +1774,7 @@ c----------------------------------------------------------------------
 	integer i,dim
 	dim = dimj
 	c_moment = cmplx(0.0d0,0.0d0)  
-	do i=1,dimj
+	do i=1,dim
            c_moment = c_moment + exp_(-ew(i)/t)/z * matjy(ev,i,i,dim)
 	end do
 	c_y_moment = -gj*c_moment
@@ -1759,7 +1792,7 @@ c----------------------------------------------------------------------
 	integer i,dim
 	dim = dimj
 	c_moment = cmplx(0.0d0,0.0d0)  
-	do i=1,dimj
+	do i=1,dim
            c_moment = c_moment + exp_(-ew(i)/t)/z * matjz(ev,i,i,dim)
 	end do
 	c_z_moment = -gj*c_moment
@@ -1783,8 +1816,8 @@ c prints out the transition energies
 c---------------------------------- 
       subroutine p_energy_values(out,energy,dimj,fmevkelvin)  
 	implicit none
-        include 'CF_SOURCES:CONTROL.INC'
-        include 'CF_SOURCES:DEGENERATION.INC'
+        include 'CONTROL.INC'
+        include 'DEGENERATION.INC'
 
 	integer out,i
  	real*8 energy(17),dimj,fmevkelvin
@@ -1792,14 +1825,16 @@ c----------------------------------
 	integer degeneration(17*17)  ! stores the degeneration of a level
  	integer n_energies        ! no. of degenerated energy levels
 	real*8  e_energies(17*17) ! energy values of the degenerated energy levels
-	real*8  i_energies(17,17) ! intensities of the degenerated energy levels      
+	real*8  i_energies(17,17) ! intensities of the degenerated energy levels    
+	integer dim
+	dim = dimj
 
 	call section(out,' THE CALCULATED ENERGY LEVELS ')
 
         if(setdegoff.eq.1) then
    1      format(x,x,i2,a2,f8.2,a4)
    2     format(x,x,i2,a2,f16.2,a4)
-          do i=1,dimj
+          do i=1,dim
              if( energy(i)/fmevkelvin .lt.1.0d5) then
                 write(out,1) i,' :',energy(i)/fmevkelvin,' meV'
              else
@@ -1825,8 +1860,8 @@ c prints the wavefunctions
 c-------------------------
       subroutine p_wave_functions(out,energy,ev,dimj)
 	implicit none
-        include 'CF_SOURCES:CONTROL.INC'
-        include 'CF_SOURCES:DEGENERATION.INC'
+        include 'CONTROL.INC'
+        include 'DEGENERATION.INC'
 
 	integer out,s,t,u
         real*8 energy(17)
@@ -1839,6 +1874,8 @@ c-------------------------
 	real*8  i_energies(17,17) ! intensities of the degenerated energy levels      
 
         integer no,ro
+        integer dim
+        dim = dimj
 
 c use the columns of ev
 	call section(out,' THE CALCULATED WAVEFUNCTIONS ')
@@ -1853,7 +1890,7 @@ c use the columns of ev
 
         i = cmplx(0.0d0 , 1.0d0)
 	j = 0.5d0*(dimj-1)
-	do s=1,dimj
+	do s=1,dim
            u = 0
  10        u  = u + 1
            if(u.gt.dimj) goto 999
@@ -1873,7 +1910,7 @@ c use the columns of ev
      *                       ro(s,degeneration,n_energies),ev(u,s),tj
            end if
 
-	   do t=u+1,dimj
+	   do t=u+1,dim
 	      tj = dble(t)-j-1
               call cifnull(ev(t,s))
 	      if(ev(t,s).ne.cmplx(0.0d0,0.0d0)) then 
@@ -1896,14 +1933,16 @@ c-------------------------------------------------------
 	integer out,i,k,s
 	complex*16 ev(17,17),tik,ci
 	real*8 dim,re,im
+      integer idim
+      idim = dim
 	call section(out,' TESTING THE UNITARY OF THE MATRIX OF WAVEFUNCTIONS U. ')
 	write(out,*)
 	write(out,*)' Only nonvanishing matrix elements (U*U+)ik are printed'
 	ci = cmplx(0.0d0,1.0d0)
-	do i=1,dim
-	   do k=1,dim
+	do i=1,idim
+	   do k=1,idim
 	      tik = cmplx(0.0d0,0.0d0)
-	      do s=1,dim
+	      do s=1,idim
  	         tik =tik+ev(i,s)*conjg(ev(k,s))
               end do
 	      re = 0.5d0*( tik+conjg(tik))
@@ -1968,18 +2007,20 @@ c---------------------------------------------------------------
         integer i,k
    3    format(1x,i2,18(1x,f6.2))   
    4    format(x,x,x,18(2x,i3,2x))
+        integer dim
+        dim = dimj
 
 !---------------------------------
 !       plot them out 
 !---------------------------------
-        write(out,4) (i,i=1,dimj)
+        write(out,4) (i,i=1,dim)
         sum0 = 0.0d0
-	do i=1,dimj
+	do i=1,dim
 	   sum=0.0d0
-	   do k=1,dimj
+	   do k=1,dim
               sum=sum+mat(i,k)
            end do  
-	   write(out,3) i,(mat(i,k),k=1,dimj),sum
+	   write(out,3) i,(mat(i,k),k=1,dim),sum
            sum0 = sum0 + sum
         end do
         write(out,*)
@@ -1994,24 +2035,26 @@ c---------------------------------------------------------------
         real*8 dimj,mat(17,17),sum0,mmat(17)        
         real*8 sum
         integer i,k
+        integer dim
    2    format(x,x,i3,18(x,i3))
   21    format(x,x,3x,18(x,f3.2))
    1    format(x,x,3x,18(x,i2,x))
+        dim = dimj
 
 !---------------------------------
 !       plot them out 
 !---------------------------------
-        write(out,1) (i,i=1,dimj)
+        write(out,1) (i,i=1,dim)
         sum0=0.0d0
-        do i=1,dimj
+        do i=1,dim
            sum=0.0d0
-           do k=1,dimj
+           do k=1,dim
               sum     = sum+mat(i,k)
               mmat(k) = int(100*mat(i,k)+0.5d0)/100.0d0
            end do 
            sum = int(100*sum+0.5d0)/100.0d0
-           write(out,2)  i,(int(mmat(k)),k=1,dimj),int(sum)
-           write(out,21)   (mmat(k)-int(mmat(k)),k=1,dimj),sum-int(sum)
+           write(out,2)  i,(int(mmat(k)),k=1,dim),int(sum)
+           write(out,21)   (mmat(k)-int(mmat(k)),k=1,dim),sum-int(sum)
            sum0 = sum0 + sum
         end do
         write(out,*)
@@ -2022,8 +2065,8 @@ c prints a table independent of rows
 c---------------------------------------------------------------
       subroutine table(out,dimj,energy,mat,sum0)   
         implicit none
-        include 'CF_SOURCES:CONTROL.INC'
-        include 'CF_SOURCES:DEGENERATION.INC'
+        include 'CONTROL.INC'
+        include 'DEGENERATION.INC'
 
         integer out
         real*8  dimj,energy(17),mat(17,17),sum0        
@@ -2154,13 +2197,13 @@ c--------------------------------------------------------
       subroutine c_crystal_field(nre,symmetry,bkq,sbkq,bmol,bext,temp,type)  
         implicit none
 
-        include 'CF_SOURCES:FRILLS.INC'
-        include 'CF_SOURCES:FOCUS.PAR'
-        include 'CF_SOURCES:CF_FABI.INC'
-        include 'CF_SOURCES:XR.INC'
-        include 'CF_SOURCES:CONTROL.INC'
-        include 'CF_SOURCES:OVERALL.INC'
-        include 'CF_SOURCES:DEGENERATION.INC'
+        include 'FRILLS.INC'
+        include 'FOCUS.PAR'
+        include 'CF_FABI.INC'
+        include 'XR.INC'
+        include 'CONTROL.INC'
+        include 'OVERALL.INC'
+        include 'DEGENERATION.INC'
 
 	integer degeneration(17*17)  ! stores the degeneration of a level
  	integer n_energies        ! no. of degenerated energy levels
@@ -2279,8 +2322,8 @@ c calculation with steven operators
 c--------------------------------------------------------
       subroutine sc_crystal_field(nre,symmetry,bkq,sbkq,bmol,bext,temp,type)  
 	implicit none
-        include 'CF_SOURCES:CF_FABI.INC'
-        include 'CF_SOURCES:CANTED.INC'
+        include 'CF_FABI.INC'
+        include 'CANTED.INC'
 
 c       INTERNAL ARRAYS
 	integer dim,m,n,k,q,qs
@@ -2294,7 +2337,7 @@ c       INTERNAL ARRAYS
         complex*16  rdkq_star(6,-6:6)
         complex*16   bex(1,-1:1)
         complex*16  rbex(1,-1:1)
-        real*8 epsilon,omega
+        real*8 epsilon_,omega
         real*8 a,b,c
         real*8 aj
         complex*16 ddrot
@@ -2392,7 +2435,7 @@ c       -------------------------------------------------------------------
               do qs=-k,k
                 rdkq_star(k,q)=rdkq_star(k,q) 
      *          + dkq_star(k,qs)
-     *            * epsilon(k,qs)/epsilon(k,q) * omega(k,qs)/omega(k,q)
+     *            * epsilon_(k,qs)/epsilon_(k,q) * omega(k,qs)/omega(k,q)
      *            * ddrot(k,q,qs,a,b,c)
               end do
            end do   
@@ -2593,8 +2636,8 @@ c calculation with 3j-symbols
 c--------------------------------------------------------
       subroutine dc_crystal_field(nre,symmetry,bkq,sbkq,bmol,bext,temp,type)   
 	implicit none
-        include 'CF_SOURCES:CF_FABI.INC'
-        include 'CF_SOURCES:CANTED.INC'
+        include 'CF_FABI.INC'
+        include 'CANTED.INC'
 
 c       INTERNAL ARRAYS
 	integer dim,m,n,k,q,qs
@@ -2608,7 +2651,7 @@ c       INTERNAL ARRAYS
         complex*16  rbex(1,-1:1)
         complex*16  b_kq 
         real*8 dreij,redmat
-        real*8 epsilon,omega
+        real*8 epsilon_,omega
         real*8 theta_k
         real*8 a,b,c
         real*8 aj                                        
@@ -2690,7 +2733,7 @@ c
 c             in the case of sbkq(k,q)=-1 the real part of Bkq(k,q)
 c             is to be interpreted as a imaginary part
               if( sbkq(k,q) .eq. -1) b_kq = i * b_kq
-              dkq_star(k,q) = b_kq/epsilon(k,q)/omega(k,q)
+              dkq_star(k,q) = b_kq/epsilon_(k,q)/omega(k,q)
               if(q.ne.0) dkq_star(k,q) = dkq_star(k,q)/2
               dkq_star(k,-q) = (-1)**q * conjg( dkq_star(k,q) )
            end do
@@ -2881,9 +2924,11 @@ c-------------------------------------
 	implicit none
 	real*8 energy(17),dimj,exp_,temp
 	integer s
+	integer dim
+	dim = dimj
 	c_occupation_factor = 0.0d0
 	if(temp.eq.0.0d0) temp=1.0d0  
-	do 10 s=1,dimj
+	do 10 s=1,dim
 	   c_occupation_factor=c_occupation_factor+exp_(-energy(s)/temp)
  10     continue
       return
@@ -3303,12 +3348,14 @@ c k=0 q=6 : o6 = o60-21*o64
 	real*8 dimj,sbkq(0:6,0:6)
 	complex*16 okq(17,17)
 	integer m,n
+	integer dim
+	dim = dimj
 
 	call s_okq(dimj,k,q,sbkq,okq)
 
 	c_operator_norm = 0.0d0
-	do m=1,dimj
-	   do n=1,dimj
+	do m=1,dim
+	   do n=1,dim
 	      c_operator_norm = c_operator_norm + okq(m,n)*conjg(okq(m,n))	
            end do
 	end do
@@ -3715,38 +3762,6 @@ c-----------------------
 	jm6 = jm(nj-5,j)*jm(nj-4,j)*jm(nj-3,j)*jm(nj-2,j)*jm(nj-1,j)*jm(nj,j)
       return
       end      
-c---------------------------------------
-      real*8 function epsilon(k,q)
-c---------------------------------------
-      implicit none
-      integer k,q
-      real*8 eps(49)
-
-c ... epsilon_kq
-      data eps/            1.00000000000000,     
-     1  0.707106781186547, 1.00000000000000, -0.707106781186547,     
-     2  0.612372435695795, 1.22474487139159,  0.500000000000000,     
-     2 -1.22474487139159,  0.612372435695795,
-     3  0.559016994374947, 1.36930639376292,  0.433012701892219,
-     3  0.500000000000000,-0.433012701892219, 1.36930639376292,
-     3 -0.559016994374947,
-     4  0.522912516583797, 1.47901994577490,  0.395284707521047,     
-     4  0.559016994374947, 0.125000000000000,-0.559016994374947,
-     4  0.395284707521047,-1.47901994577490,  0.522912516583797,     
-     5  0.496078370824611, 1.56873754975139,  0.369754986443726,     
-     5  0.603807364424560, 0.114108866146910, 0.125000000000000,     
-     5 -0.114108866146910, 0.603807364424560,-0.369754986443726,     
-     5  1.56873754975139, -0.496078370824611,     
-     6  0.474958879799083, 1.64530582263602,  0.350780380010057,     
-     6  0.640434422872475, 0.106739070478746, 0.135015431216830,     
-     6  0.062500000000000,-0.135015431216830, 0.106739070478746,     
-     6 -0.640434422872475, 0.350780380010057,-1.64530582263602,     
-     6  0.474958879799083/
-
-        epsilon = eps(k*(k+1) + q+1)
-
-      return
-      end
 c---------------------------------------
       real*8 function omega(k,q)
 c---------------------------------------

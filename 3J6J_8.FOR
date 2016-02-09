@@ -193,12 +193,14 @@ c                                                                      *
 c***********************************************************************
       real*8 function fac(n)
       implicit none
-      real*8 n,i
+      real*8 n
+      integer m,i
       fac = 0.0d0
       if(n.lt.0.0) return
       fac = 1.0d0
       if(n.eq.0.0d0) return
-      do 10,i=1.0d0,n,1.0d0
+      m = n
+      do 10,i=1,m
          fac = fac*i
  10   continue
       return
